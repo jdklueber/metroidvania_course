@@ -38,8 +38,11 @@ public class PlayerController : MonoBehaviour
     public Transform BombPoint;
     public GameObject Bomb;
 
+    private PlayerAbilityManager Abilities;
+
     void Start()
     {
+        Abilities = GetComponent<PlayerAbilityManager>();
     }
 
     void Update()
@@ -47,7 +50,7 @@ public class PlayerController : MonoBehaviour
         if (DashCooldownCounter > 0)
         {
             DashCooldownCounter -= Time.deltaTime;
-        } else if (Input.GetButtonDown("Fire2") && DashCooldownCounter <= 0 && Standing.activeSelf)
+        } else if (Input.GetButtonDown("Fire2") && DashCooldownCounter <= 0 && Standing.activeSelf && Abilities.CanDash)
         {
             DashCounter = DashTime;
             DisplayAfterimage();
@@ -79,13 +82,13 @@ public class PlayerController : MonoBehaviour
             else if (Rigidbody.velocity.x > 0)
             {
                 transform.localScale = Vector3.one;
-            }
+            } 
         }
 
 
         IsOnGround = Physics2D.OverlapCircle(GroundPoint.position, .2f, GroundLayer);
 
-        if (Input.GetButtonDown("Jump") && (IsOnGround || CanDoubleJump))
+        if (Input.GetButtonDown("Jump") && (IsOnGround || (CanDoubleJump && Abilities.CanDoubleJump) ))
         {
             if (IsOnGround)
             {
@@ -109,14 +112,14 @@ public class PlayerController : MonoBehaviour
                 Animator.SetTrigger("ShotFired");
             }
 
-            if (Ball.activeSelf)
+            if (Ball.activeSelf && Abilities.CanDropBomb)
             {
                 Instantiate(Bomb, BombPoint.position, BombPoint.rotation);
             }
         }
 
         //ball mode
-        if (!Ball.activeSelf)
+        if (!Ball.activeSelf && Abilities.CanTurnIntoBall)
         {
             if (Input.GetAxisRaw("Vertical") < -.9f)
             {
